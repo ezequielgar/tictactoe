@@ -1,0 +1,318 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ===========================
+// USUARIOS Y AUTENTICACIÓN
+// ===========================
+
+model User {
+  id        String   @id @default(cuid())
+  googleId  String   @unique
+  email     String   @unique
+  name      String
+  avatarUrl String?
+  role      Role     @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones FIFA
+  tournamentRegistrations UserTournamentRegistration[]
+  teamMemberships         TeamMember[]
+  matchStats              MatchPlayerStat[]
+
+  // Relaciones Prode
+  predictions Prediction[]
+
+  @@map("users")
+}
+
+enum Role {
+  PENDING
+  PLAYER
+  ADMIN
+}
+
+// ===========================
+// TORNEOS FIFA
+// ===========================
+
+model Tournament {
+  id          String           @id @default(cuid())
+  name        String
+  description String?
+  type        TournamentType
+  format      MatchFormat
+  status      TournamentStatus @default(DRAFT)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdById String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  registrations UserTournamentRegistration[]
+  matches       Match[]
+  teams         Team[]
+
+  @@map("tournaments")
+}
+
+enum TournamentType {
+  LEAGUE
+  CUP
+  FRIENDLY
+}
+
+enum MatchFormat {
+  ONE_VS_ONE
+  TWO_VS_TWO
+  MIXED
+}
+
+enum TournamentStatus {
+  DRAFT
+  OPEN
+  IN_PROGRESS
+  FINISHED
+}
+
+model UserTournamentRegistration {
+  id           String    @id @default(cuid())
+  userId       String
+  tournamentId String
+  status       RegStatus @default(PENDING)
+  registeredAt DateTime  @default(now())
+  approvedAt   DateTime?
+  approvedById String?
+
+  user       User       @relation(fields: [userId], references: [id])
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+
+  @@unique([userId, tournamentId])
+  @@map("user_tournament_registrations")
+}
+
+enum RegStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ===========================
+// EQUIPOS (para 2v2)
+// ===========================
+
+model Team {
+  id           String   @id @default(cuid())
+  name         String
+  tournamentId String
+  createdAt    DateTime @default(now())
+
+  tournament     Tournament @relation(fields: [tournamentId], references: [id])
+  members        TeamMember[]
+  matchesAsTeam1 Match[]    @relation("Team1Matches")
+  matchesAsTeam2 Match[]    @relation("Team2Matches")
+  wonMatches     Match[]    @relation("WinnerTeam")
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id       String   @id @default(cuid())
+  teamId   String
+  userId   String
+  joinedAt DateTime @default(now())
+
+  team Team @relation(fields: [teamId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+// ===========================
+// PARTIDOS
+// ===========================
+
+model Match {
+  id           String      @id @default(cuid())
+  tournamentId String
+  format       MatchFormat
+  status       MatchStatus @default(SCHEDULED)
+  scheduledAt  DateTime?
+  playedAt     DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Para 1v1
+  player1Id String?
+  player2Id String?
+  winnerId  String?
+
+  // Para 2v2
+  team1Id      String?
+  team2Id      String?
+  winnerTeamId String?
+
+  tournament  Tournament      @relation(fields: [tournamentId], references: [id])
+  team1       Team?           @relation("Team1Matches", fields: [team1Id], references: [id])
+  team2       Team?           @relation("Team2Matches", fields: [team2Id], references: [id])
+  winnerTeam  Team?           @relation("WinnerTeam", fields: [winnerTeamId], references: [id])
+  playerStats MatchPlayerStat[]
+
+  @@map("matches")
+}
+
+enum MatchStatus {
+  SCHEDULED
+  IN_PROGRESS
+  FINISHED
+  CANCELLED
+}
+
+model MatchPlayerStat {
+  id       String  @id @default(cuid())
+  matchId  String
+  userId   String
+  teamId   String?
+  goals    Int     @default(0)
+  isWinner Boolean @default(false)
+
+  match Match @relation(fields: [matchId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([matchId, userId])
+  @@map("match_player_stats")
+}
+
+// ===========================
+// MÓDULO PRODE
+// ===========================
+
+model ProdeChampionship {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  prize       String?
+  status      ProdeStatus @default(DRAFT)
+  createdById String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  worldMatches WorldMatch[]
+  predictions  Prediction[]
+
+  @@map("prode_championships")
+}
+
+enum ProdeStatus {
+  DRAFT
+  OPEN
+  LOCKED
+  FINISHED
+}
+
+model WorldMatch {
+  id             String           @id @default(cuid())
+  championshipId String
+  homeTeam       String
+  awayTeam       String
+  homeTeamCode   String
+  awayTeamCode   String
+  stage          String
+  venue          String?
+  city           String?
+  scheduledAt    DateTime
+  status         WorldMatchStatus @default(UPCOMING)
+
+  homeGoals   Int?
+  awayGoals   Int?
+  homeGoalsHT Int?
+  awayGoalsHT Int?
+  winner      MatchWinner?
+
+  championship ProdeChampionship @relation(fields: [championshipId], references: [id])
+  predictions  Prediction[]
+  bonusEvents  BonusEvent[]
+
+  @@map("world_matches")
+}
+
+enum WorldMatchStatus {
+  UPCOMING
+  LIVE
+  FINISHED
+  POSTPONED
+}
+
+enum MatchWinner {
+  HOME
+  AWAY
+  DRAW
+}
+
+model BonusEvent {
+  id          String         @id @default(cuid())
+  matchId     String
+  type        BonusEventType
+  minute      Int?
+  teamCode    String?
+  occurred    Boolean        @default(false)
+  description String?
+
+  match            WorldMatch        @relation(fields: [matchId], references: [id])
+  predictionEvents PredictionEvent[]
+
+  @@map("bonus_events")
+}
+
+enum BonusEventType {
+  GOAL_MINUTE
+  FIRST_GOAL_TEAM
+  CLEAN_SHEET
+  RED_CARD
+  OVERTIME
+  PENALTY_SHOOTOUT
+}
+
+model Prediction {
+  id             String      @id @default(cuid())
+  userId         String
+  championshipId String
+  matchId        String
+  submittedAt    DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  predictedHomeGoals Int
+  predictedAwayGoals Int
+  predictedWinner    MatchWinner
+
+  points   Int?
+  isLocked Boolean @default(false)
+
+  user             User              @relation(fields: [userId], references: [id])
+  championship     ProdeChampionship @relation(fields: [championshipId], references: [id])
+  match            WorldMatch        @relation(fields: [matchId], references: [id])
+  bonusPredictions PredictionEvent[]
+
+  @@unique([userId, matchId])
+  @@map("predictions")
+}
+
+model PredictionEvent {
+  id           String  @id @default(cuid())
+  predictionId String
+  bonusEventId String
+  predicted    Boolean
+  points       Int?
+
+  prediction Prediction @relation(fields: [predictionId], references: [id])
+  bonusEvent BonusEvent @relation(fields: [bonusEventId], references: [id])
+
+  @@unique([predictionId, bonusEventId])
+  @@map("prediction_events")
+}

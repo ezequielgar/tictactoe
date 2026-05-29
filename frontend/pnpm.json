@@ -1,0 +1,4 @@
+{
+  "minimumReleaseAge": "0 seconds",
+  "onlyBuiltDependencies": ["esbuild", "rolldown", "@tailwindcss/oxide"]
+}
