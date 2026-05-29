@@ -11,12 +11,14 @@ datasource db {
 // ===========================
 
 model User {
-  id        String   @id @default(cuid())
-  googleId  String   @unique
-  email     String   @unique
-  name      String
-  avatarUrl String?
-  role      Role     @default(PENDING)
+  id            String   @id @default(cuid())
+  googleId      String   @unique
+  email         String   @unique
+  name          String
+  displayName   String?
+  avatarUrl     String?
+  favoriteTeam  String?
+  role          Role     @default(PENDING)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

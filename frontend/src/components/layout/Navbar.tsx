@@ -46,7 +46,9 @@ export function Navbar() {
 
           {user && (
             <div className="ml-2 flex items-center gap-2">
-              <Avatar src={user.avatarUrl} name={user.name} size="sm" />
+              <Link to="/profile" className="rounded-full hover:ring-2 hover:ring-primary-500 transition-all">
+                <Avatar src={user.avatarUrl} name={user.displayName ?? user.name} size="sm" />
+              </Link>
               <button
                 onClick={handleLogout}
                 className="rounded-lg px-3 py-1.5 text-sm text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"

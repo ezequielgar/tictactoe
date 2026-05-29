@@ -1,12 +1,18 @@
 import { api } from './api'
-import type { Tournament, Match, PlayerStats, RankingEntry, HeadToHead } from '@/types'
+import type { Tournament, TournamentDetail, Match, PlayerStats, RankingEntry, HeadToHead } from '@/types'
 
 export const tournamentsService = {
   list: () => api.get<Tournament[]>('/tournaments').then((r) => r.data),
-  getById: (id: string) => api.get<Tournament>(`/tournaments/${id}`).then((r) => r.data),
-  create: (data: Partial<Tournament>) =>
-    api.post<Tournament>('/tournaments', data).then((r) => r.data),
-  update: (id: string, data: Partial<Tournament>) =>
+  getById: (id: string) => api.get<TournamentDetail>(`/tournaments/${id}`).then((r) => r.data),
+  create: (data: {
+    name: string
+    description?: string
+    type: string
+    format: string
+    startDate?: string
+    endDate?: string
+  }) => api.post<Tournament>('/tournaments', data).then((r) => r.data),
+  update: (id: string, data: Partial<{ name: string; description: string; status: string; startDate: string; endDate: string }>) =>
     api.patch<Tournament>(`/tournaments/${id}`, data).then((r) => r.data),
   register: (id: string) =>
     api.post(`/tournaments/${id}/register`).then((r) => r.data),

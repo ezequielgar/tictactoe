@@ -1,12 +1,35 @@
 export type Role = 'PENDING' | 'PLAYER' | 'ADMIN'
 
+export type RegStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
+
+export interface Registration {
+  id: string
+  userId: string
+  tournamentId: string
+  status: RegStatus
+  registeredAt: string
+  approvedAt?: string
+  user: Pick<User, 'id' | 'name' | 'avatarUrl'>
+}
+
+export interface TournamentDetail extends Tournament {
+  registrations: Registration[]
+  matches: Match[]
+}
+
 export interface User {
   id: string
   email: string
   name: string
+  displayName?: string
   avatarUrl?: string
+  favoriteTeam?: string
   role: Role
   createdAt: string
+}
+
+export interface UserProfile extends User {
+  stats: PlayerStats
 }
 
 export type TournamentType = 'LEAGUE' | 'CUP' | 'FRIENDLY'

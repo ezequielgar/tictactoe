@@ -37,7 +37,7 @@ export async function getTournamentById(id: string) {
     include: {
       registrations: {
         include: { user: { select: { id: true, name: true, avatarUrl: true } } },
-        where: { status: 'APPROVED' },
+        orderBy: { registeredAt: 'asc' as const },
       },
       matches: {
         orderBy: { scheduledAt: 'desc' },

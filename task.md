@@ -32,6 +32,16 @@
 - [x] Inicializar repo Git
 - [x] Subir código inicial a GitHub (`https://github.com/ezequielgar/tictactoe.git`)
 
+### ⚽ FIFA — Gestión de Torneos y Partidos
+- [x] Form **crear torneo** (Admin) — `/tournaments/new` con nombre, tipo, formato, fechas
+- [x] Cambio de estado del torneo (Admin) — DRAFT → OPEN → IN_PROGRESS → FINISHED
+- [x] **Inscribirse a torneo** (Player) — botón en detalle del torneo cuando status es OPEN
+- [x] Mostrar estado de inscripción del usuario (Pendiente / Inscripto / Rechazado)
+- [x] **Aprobar/rechazar inscripciones** (Admin) — panel dentro del detalle del torneo (status OPEN)
+- [x] Form **cargar partido** (Admin) — modal en detalle, selecciona 2 jugadores inscriptos
+- [x] Form **cargar resultado** (Admin) — modal por partido SCHEDULED, carga goles y determina ganador
+- [x] Ranking del torneo — se actualiza automáticamente al cargar resultados
+
 ---
 
 ## 🚧 En Progreso
@@ -43,25 +53,18 @@ _(nada en este momento)_
 ## 📌 Pendiente — Fase 1 (MVP Local)
 
 ### Admin
-- [ ] Pantalla de aprobación de usuarios (listar pendientes, aprobar/rechazar)
 - [ ] Dashboard admin: usuarios activos, torneos activos, últimos partidos
 - [ ] Migrar a `prisma migrate dev` con historial de migraciones formal (actualmente usamos `db push`)
 
 ### FIFA — Backend
-- [ ] CRUD de torneos (crear, editar, abrir inscripción, iniciar, finalizar)
-- [ ] CRUD de partidos 1v1 (crear, cargar resultado, confirmar ganador)
-- [ ] Registro de participantes en torneos (inscripción + aprobación admin)
-- [ ] Endpoints de estadísticas individuales (victorias, goles, partidos jugados)
-- [ ] Head to head entre dos jugadores
+- [ ] CRUD de torneos (editar torneo existente — nombre, descripción, fechas)
+- [ ] Soporte Head to Head: listar todos los jugadores activos para selector
 
 ### FIFA — Frontend
-- [ ] Layout base: Navbar, Sidebar, Footer (mobile first)
-- [ ] Página de torneos (lista + detalle)
-- [ ] Formulario crear torneo (admin)
-- [ ] Página de partidos (lista + cargar resultado)
-- [ ] Perfil de jugador con estadísticas
-- [ ] Comparador 1v1 (head to head)
-- [ ] Ranking del torneo
+- [ ] Layout base: Sidebar mejorado, Footer (mobile first)
+- [ ] Perfil de jugador con estadísticas individuales
+- [ ] Comparador 1v1 mejorado (head to head con historial visual)
+- [ ] Pantalla de aprobación de jugadores mejorada (con contadores y filtros)
 
 ### Deploy
 - [ ] Configurar DNS: registro A `tictactoe.lechugasweb.com.ar` → IP VPS
